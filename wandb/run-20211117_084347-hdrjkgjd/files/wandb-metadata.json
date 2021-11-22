@@ -1,0 +1,16 @@
+{
+    "os": "Darwin-19.0.0-x86_64-i386-64bit",
+    "python": "3.7.11",
+    "heartbeatAt": "2021-11-17T00:43:54.962437",
+    "startedAt": "2021-11-17T00:43:47.573257",
+    "docker": null,
+    "cpu_count": 4,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/wangxinyuan/Desktop/PyCharm_Projects/Pytorch-UNet/train.py",
+    "codePath": "train.py",
+    "host": "wangxinyuan-MacBook-Pro.local",
+    "username": "wangxinyuan",
+    "executable": "/opt/anaconda3/envs/pytorch/bin/python"
+}
