@@ -8,15 +8,18 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
-
 class BasicDataset(Dataset):
     def __init__(self, images_dir: str, masks_dir: str, scale: float = 1.0, mask_suffix: str = ''):
+
         self.images_dir = Path(images_dir)
         self.masks_dir = Path(masks_dir)
+        #图片放缩
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
         self.scale = scale
+        #mask前缀
         self.mask_suffix = mask_suffix
-
+        print("using mask suffix: {}".format(self.mask_suffix))
+        #给imagesdir中图像加上索引
         self.ids = [splitext(file)[0] for file in listdir(images_dir) if not file.startswith('.')]
         if not self.ids:
             raise RuntimeError(f'No input file found in {images_dir}, make sure you put your images there')
@@ -27,9 +30,13 @@ class BasicDataset(Dataset):
 
     @classmethod
     def preprocess(cls, pil_img, scale, is_mask):
+        # 获取宽和高
         w, h = pil_img.size
+        # 获取scale后的宽和高
         newW, newH = int(scale * w), int(scale * h)
+        # scale过小
         assert newW > 0 and newH > 0, 'Scale is too small, resized images would have no pixel'
+        # resize
         pil_img = pil_img.resize((newW, newH), resample=Image.NEAREST if is_mask else Image.BICUBIC)
         img_ndarray = np.asarray(pil_img)
 
@@ -41,6 +48,12 @@ class BasicDataset(Dataset):
 
         if not is_mask:
             img_ndarray = img_ndarray / 255
+
+        if img_ndarray.ndim == 2 and is_mask:
+            img_ndarray = img_ndarray / 255
+
+
+
 
         return img_ndarray
 
@@ -79,3 +92,4 @@ class BasicDataset(Dataset):
 class CarvanaDataset(BasicDataset):
     def __init__(self, images_dir, masks_dir, scale=1):
         super().__init__(images_dir, masks_dir, scale, mask_suffix='_mask')
+

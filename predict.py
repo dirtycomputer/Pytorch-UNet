@@ -31,11 +31,16 @@ def predict_img(net,
     with torch.no_grad():
         # 将原图像放入模型中进行预测
         output = net(img)
-
-        if net.n_classes > 1:
-            probs = F.softmax(output, dim=1)[0]
+        if(device.type == 'cuda'):
+            if net.module.n_classes > 1:
+                probs = F.softmax(output, dim=1)[0]
+            else:
+                probs = torch.sigmoid(output)[0]
         else:
-            probs = torch.sigmoid(output)[0]
+            if net.n_classes > 1:
+                probs = F.softmax(output, dim=1)[0]
+            else:
+                probs = torch.sigmoid(output)[0]
 
         tf = transforms.Compose([
             transforms.ToPILImage(),
@@ -44,11 +49,16 @@ def predict_img(net,
         ])
 
         full_mask = tf(probs.cpu()).squeeze()
-
-    if net.n_classes == 1:
-        return (full_mask > out_threshold).numpy()
+    if (device.type == 'cuda'):
+        if net.module.n_classes == 1:
+            return (full_mask > out_threshold).numpy()
+        else:
+            return F.one_hot(full_mask.argmax(dim=0), net.module.n_classes).permute(2, 0, 1).numpy()
     else:
-        return F.one_hot(full_mask.argmax(dim=0), net.n_classes).permute(2, 0, 1).numpy()
+        if net.n_classes == 1:
+            return (full_mask > out_threshold).numpy()
+        else:
+            return F.one_hot(full_mask.argmax(dim=0), net.n_classes).permute(2, 0, 1).numpy()
 
 
 def get_args():
